@@ -11,8 +11,6 @@ class Environment():
         for this in self.particles:
             this.tick()
 
-
-
 class Particle:
     def __init__(self, env, R, V, radius, color):
         self.env = env
