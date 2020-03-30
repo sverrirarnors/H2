@@ -17,11 +17,11 @@ pygame.init()
 
 # set up the window
 DIM = np.asarray([1200, 600])
-xmax = 1200
-ymax = 1200
+xmax = 1000
+ymax = 1000
 windowSurface = pygame.display.set_mode((xmax, ymax))
 
-FRAMES_PER_SECOND = 60
+FRAMES_PER_SECOND = 120
 
 
 n = 50 # Number of points
