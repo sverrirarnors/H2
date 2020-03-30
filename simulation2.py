@@ -3,6 +3,8 @@ import pygame
 from pygame.locals import *
 import time
 
+from options import *
+
 from queue import Queue
 
 COLORS = {'B': (255, 255, 255),
@@ -22,10 +24,33 @@ class Simulation:
         self.q = []
         self.next = None
 
+    def detectCollision(self, p, q):
+        # Find the distance between two particles
+        # dist = np.linalg.norm(p.r - q.r)
+        dx = p.r[0] - q.r[0]
+        dy = p.r[1] - q.r[1]
+        dist = np.sqrt(dx**2 + dy**2)
+        # sum_radius = p.radius*2
+        sum_radius = RADIUS*2
+
+        if dist < sum_radius:
+            return True
+        else:
+            return False
+
+    def changeDirection(self, dr):
+        theta = np.arctan2(dr[1], dr[0])
+
+        return np.array((np.cos(theta), np.sin(theta)))
+
     def collide(self, p, q):
         x = lambda a, b : a.v - (np.dot(a.v-b.v, a.r-b.r)/(np.linalg.norm(a.r - b.r)**2))*(a.r-b.r)
+
         p.v = x(p, q)
         q.v = x(q, p)
+        # ar = self.changeDirection(q.r - p.r)
+        # p.v -= ar
+        # q.v = ar
 
         if p.status is "S" and q.status is "I":
             self.infect(p)
@@ -35,18 +60,20 @@ class Simulation:
     def infect(self, particle):
         particle.status = "I"
         # Adds particle to queue with time + 5 sec
-        self.q.append((self.t + 100, particle))
+        self.q.append((self.t + TIME_TO_RECOVER, particle))
 
     def recover(self, particle):
         particle.status = "R"
+        particle.hasMovement = False
 
     def addParticles(self, count):
         particles = []
         for i in range(count):
+            hasMovement = False if np.random.uniform(100) < STATIC_PEOPLE_PERCENTAGE else True
             p = Particle(np.random.rand(2),
-                         np.random.rand(2)*0.01,
+                         0.02*np.random.rand(2)-0.01,
                          self.colors['susceptible'],
-                         0.02)
+                         hasMovement)
             particles.append(p)
         self.particles = particles
 
@@ -58,9 +85,9 @@ class Simulation:
     def display(self):
         for particle in self.particles:
             pygame.draw.circle(self.windowSurface, COLORS[particle.status], \
-                                       (int(self.xmax * particle.r[0]), int(self.ymax * particle.r[1])), int(self.xmax*particle.radius), 0)
+                                       (int(self.xmax * particle.r[0]), int(self.ymax * particle.r[1])), int(self.xmax*RADIUS), 0)
     def simulate(self):
-        self.addParticles(10)
+        self.addParticles(NUMBER_OF_PEOPLE)
 
         self.infect(self.particles[3])
 
@@ -75,20 +102,14 @@ class Simulation:
             # Update positions
             [particle.step() for particle in self.particles]
 
-
+            order = np.random.permutation(NUMBER_OF_PEOPLE)
             # Do collisions
             for i in range(len(self.particles)):
                 for j in range(i + 1, len(self.particles)):
-                    if self.particles[i].detectCollision(self.particles[j]):
-                        self.collide(self.particles[i], self.particles[j])
+                    if self.detectCollision(self.particles[order[i]], self.particles[order[j]]):
+                        self.collide(self.particles[order[i]], self.particles[order[j]])
                         break
-            # for a in self.particles:
-            #     for b in self.particles:
-            #         if a is not b and a.detectCollision(b):
-            #             a.collide(b)
-            #             break
 
-            # Display particles
             self.display()
 
             pygame.display.update()
@@ -103,30 +124,20 @@ class Simulation:
 
 # Takes in r=np.array((x,y)), v.np.array((vx,vy))
 class Particle:
-    def __init__(self, r, v, color, radius):
+    def __init__(self, r, v, color, hasMovement = True):
         self.r = r
         self.v = v
-        self.radius = radius
         self.status = "S"
-
-    def detectCollision(self, other):
-        # Find the distance between two particles
-        dist = np.hypot(*(self.r - other.r))
-        sum_radius = self.radius + other.radius
-
-        if dist <= sum_radius:
-            return True
-        else:
-            return False
-
-
-
+        self.hasMovement = hasMovement
 
     def step(self):
+        if not self.hasMovement:
+            return
+
         # Collide with walls
-       if self.r[0] < 0 or self.r[0] > 1 :
+        if self.r[0] < 0 or self.r[0] > 1 :
            self.v[0] = -self.v[0]
-       if self.r[1] < 0 or self.r[1] > 1 :
+        if self.r[1] < 0 or self.r[1] > 1 :
            self.v[1] = -self.v[1]
 
-       self.r += self.v
+        self.r += self.v

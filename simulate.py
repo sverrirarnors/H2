@@ -37,7 +37,7 @@ vx = speed * np.random.rand(n)
 vy = speed * np.random.rand(n)
 
 
-simulation = Simulation(xmax, ymax, 60, windowSurface, COLORS)
+simulation = Simulation(xmax, ymax, 30, windowSurface, COLORS)
 
 simulation.simulate()
 # # run the main loop
