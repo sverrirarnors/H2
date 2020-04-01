@@ -71,7 +71,7 @@ class Simulation:
         for i in range(count):
             hasMovement = False if np.random.uniform(100) < STATIC_PEOPLE_PERCENTAGE else True
             p = Particle(np.random.rand(2),
-                         0.02*np.random.rand(2)-0.01,
+                         (2*np.random.rand(2)-1) * SPEED,
                          self.colors['susceptible'],
                          hasMovement)
             particles.append(p)
@@ -93,7 +93,7 @@ class Simulation:
 
         pygame.display.set_caption('Covid-19 hermir')
         fpsClock = pygame.time.Clock()
-        while True:
+        while self.t < TOTAL_TICKS:
             for event in pygame.event.get():
                 if (event.type == pygame.QUIT):
                     gameLoop = False
@@ -106,8 +106,10 @@ class Simulation:
             # Do collisions
             for i in range(len(self.particles)):
                 for j in range(i + 1, len(self.particles)):
-                    if self.detectCollision(self.particles[order[i]], self.particles[order[j]]):
-                        self.collide(self.particles[order[i]], self.particles[order[j]])
+                    if self.detectCollision(self.particles[order[i]], \
+                                            self.particles[order[j]]):
+                        self.collide(self.particles[order[i]], \
+                                     self.particles[order[j]])
                         break
 
             self.display()
