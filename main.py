@@ -1,29 +1,57 @@
-# Simple pygame program
+import numpy as np
+import tkinter as tk
+from tkinter import font  as tkfont
 
-# Import and initialize the pygame library
-import pygame
-pygame.init()
+from options import *
+from simulation import Simulation
 
-# Set up the drawing window
-screen = pygame.display.set_mode([500, 500])
+class Basis(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
 
-# Run until the user asks to quit
-running = True
-while running:
+        self.container = tk.Frame(self)
+        self.container.pack(side="top", fill="both", expand=False)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+        self.label = tk.Label(self, text="COVID-19 hermir", font = tkfont.Font(family='Helvetica', size=18, weight="bold"))
+        self.canvas = tk.Canvas(self,
+                           width=DIMENSIONS['width'],
+                           height=DIMENSIONS['height'])
 
-    # Did the user click the window close button?
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        self.label.pack(fill=tk.X)
+        self.canvas.pack(fill=tk.X)
+        self.canvas.config(bg="white")
 
-    # Fill the background with white
-    screen.fill((255, 255, 255))
+        self.w_label = tk.Label(self, text="Fólksfjöldi", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
+        self.w = tk.Scale(self, from_=50, to=150, orient="horizontal")
+        self.w_label.pack(fill=tk.X)
+        self.n0_label = tk.Label(self, text="Fjöldi smitaðra", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
+        self.n0 = tk.Scale(self, from_=1, to=10, orient="horizontal")
+        self.w.pack(fill=tk.X)
+        self.n0_label.pack(fill=tk.X)
+        self.n0.pack(fill=tk.X)
+        self.b = tk.Button(self, text="Byrja", command= self.start_simulation)
+        self.b.pack(fill = tk.X)
+        self.c = tk.Button(self, text="Hætta", command=self.stop_simulation)
+        self.c.configure(state='disabled')
+        self.c.pack(fill = tk.X)
 
-    # Draw a solid blue circle in the center
-    pygame.draw.circle(screen, (0, 0, 255), (250, 250), 75)
+    def start_simulation(self):
+        self.b.configure(state='disabled')
+        self.w.configure(state='disabled')
+        self.c.configure(state='normal')
+        self.s = Simulation(self.canvas)
+        self.s.simulate(self.w.get(), self.n0.get())
 
-    # Flip the display
-    pygame.display.flip()
+    def stop_simulation(self):
+        self.b.configure(state='normal')
+        self.w.configure(state='normal')
+        self.s.cancel()
+        self.canvas.delete('all')
 
-# Done! Time to quit.
-pygame.quit()
+
+
+if __name__ == "__main__":
+    app = Basis()
+    app.title("COVID-19 hermun")
+    app.mainloop()
