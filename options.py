@@ -2,7 +2,7 @@
 RADIUS = 7
 DIMENSIONS = {
     'height': 600,
-    'width': 600,
+    'width': 1200,
 }
 NUMBER_OF_PEOPLE = 100
 STATIC_PEOPLE_PERCENTAGE = 25

@@ -55,7 +55,6 @@ class Simulation:
         particle.status = "I"
         # Adds particle to queue with time + 5 sec
         self.q.append((self.t + TIME_TO_RECOVER, particle))
-        particle.v *= 2
 
     def recover(self, particle):
         particle.status = "R"
