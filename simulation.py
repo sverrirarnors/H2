@@ -1,6 +1,6 @@
 import numpy as np
 from options import *
-
+import csv
 from particle import Particle
 from options import *
 
@@ -16,6 +16,11 @@ class Simulation:
         self.next = None
         self.canvas = canvas
         self.basis = basis
+        self.stats = {
+            "S":0,
+            "I":0,
+            "R":0
+        }
 
 
     def detectCollision(self, p, q):
@@ -53,15 +58,20 @@ class Simulation:
             self.infect(q)
 
     def infect(self, particle):
+        self.stats["S"] -= 1
+        self.stats["I"] += 1
         particle.status = "I"
         # Adds particle to queue with time + 5 sec
         self.q.append((self.t + TIME_TO_RECOVER, particle))
 
     def recover(self, particle):
+        self.stats["I"] -= 1
+        self.stats["R"] += 1
         particle.status = "R"
 
     def addParticles(self, count):
         particles = []
+        self.stats["S"] = count
         for i in range(count):
             hasMovement = False if np.random.uniform(100) < self.mobility else True
             p = Particle(np.random.rand(2),
@@ -84,15 +94,17 @@ class Simulation:
         for i in range(np):
             self.infect(self.particles[i])
 
+        self.fieldnames = ["x", "S", "I", "R"]
+        with open('gogn.csv', 'w+') as csv_file:
+            csv_writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
+            csv_writer.writeheader()
 
         self.loop()
 
     def loop(self):
-        print(self.t)
-        if self.t > TOTAL_TICKS:
-            print("Stopp nú")
-            self.canvas.after_cancel(self._job)
-            self.basis.stop_simulation()
+        # if self.t > TOTAL_TICKS:
+        #     self.canvas.after_cancel(self._job)
+        #     self.basis.stop_simulation()
         self.canvas.delete('all')
         # Update positions
         [particle.step() for particle in self.particles]
@@ -112,5 +124,17 @@ class Simulation:
         for event in self.q:
             if event[0] == self.t:
                 self.recover(event[1])
+
+        with open('gogn.csv', 'a') as csv_file:
+            csv_writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
+
+            info = {
+                "x": self.t,
+                "S": self.stats["S"],
+                "I": self.stats["I"],
+                "R": self.stats["R"]
+            }
+
+            csv_writer.writerow(info)
 
         self._job = self.canvas.after(int(1000/FRAMES_PER_SECOND), self.loop)
