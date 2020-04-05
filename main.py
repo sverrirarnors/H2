@@ -5,17 +5,11 @@ from tkinter import font  as tkfont
 from options import *
 from simulation import Simulation
 
-from sys import platform as sys_pf
-if sys_pf == 'darwin':
-    import matplotlib
-    matplotlib.use("TkAgg")
-
-
 # For plot
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
+import pandas as pd
 
 
 class Basis(tk.Tk):
@@ -62,13 +56,13 @@ class Basis(tk.Tk):
         self.stop.grid(row=5, column = 1, columnspan=2)
 
         # Graph
-        fig = plt.Figure()
-        t = np.arange(0, 3, .01)
-        self.graph = FigureCanvasTkAgg(fig, master=self)
+        x = np.arange(0, 2*np.pi, 0.01)
+        self.fig = plt.Figure()
+        self.plot = self.fig.add_subplot(111)
+        self.graph = FigureCanvasTkAgg(self.fig, master=self)
         self.graph.get_tk_widget().grid(column=8, columnspan=2, rowspan=1, row=2)
-        ax = fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
-        line, = ax.plot(x, np.sin(x))
-        ani = animation.FuncAnimation(fig, animate, np.arange(1, 200), interval=25, blit=False)
+        self.ani = animation.FuncAnimation(self.fig, self.animate, interval=100)
+
 
     def start_simulation(self):
         self.begin.configure(state='disabled')
@@ -84,6 +78,23 @@ class Basis(tk.Tk):
         self.s.cancel()
         self.canvas.delete('all')
 
+    def animate(self, i):
+        print("Keyrir")
+        data = pd.read_csv('gogn.csv')
+        x = data['x']
+        susceptible = data['S']
+        infected = data['I']
+        removed = data['R']
+        # x = s.t
+        # susceptible = s.stats["S"]
+        # infected = s.stats["I"]
+        # removed = s.stats["R"]
+
+        self.plot.cla()
+
+        self.plot.plot(x, susceptible, label='S')
+        self.plot.plot(x, infected, label='I')
+        self.plot.plot(x, removed, label='R')
 
 
 if __name__ == "__main__":
