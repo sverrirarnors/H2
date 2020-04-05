@@ -1,4 +1,4 @@
-"""Keyra skránna í terminal með skipun: 
+"""Keyra skránna í terminal með skipun:
 python3 mpl_graf.py &
 python3 data.py &"""
 
@@ -7,6 +7,11 @@ from itertools import count
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+
+from sys import platform as sys_pf
+if sys_pf == 'darwin':
+    import matplotlib
+    matplotlib.use("TkAgg")
 
 plt.style.use('ggplot')
 

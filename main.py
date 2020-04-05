@@ -5,6 +5,18 @@ from tkinter import font  as tkfont
 from options import *
 from simulation import Simulation
 
+from sys import platform as sys_pf
+if sys_pf == 'darwin':
+    import matplotlib
+    matplotlib.use("TkAgg")
+
+
+# For plot
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
 
 class Basis(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -22,6 +34,7 @@ class Basis(tk.Tk):
         self.label.grid(row=1, columnspan=4)
         self.canvas.grid(row=2, columnspan=4)
         self.canvas.config(bg="white")
+
 
         # Population-slider
         self.pop_label = tk.Label(self, text="Fólksfjöldi", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
@@ -47,6 +60,15 @@ class Basis(tk.Tk):
         self.stop = tk.Button(self, text="Hætta", command=self.stop_simulation)
         self.stop.configure(state='disabled')
         self.stop.grid(row=5, column = 1, columnspan=2)
+
+        # Graph
+        fig = plt.Figure()
+        t = np.arange(0, 3, .01)
+        self.graph = FigureCanvasTkAgg(fig, master=self)
+        self.graph.get_tk_widget().grid(column=8, columnspan=2, rowspan=1, row=2)
+        ax = fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
+        line, = ax.plot(x, np.sin(x))
+        ani = animation.FuncAnimation(fig, animate, np.arange(1, 200), interval=25, blit=False)
 
     def start_simulation(self):
         self.begin.configure(state='disabled')
