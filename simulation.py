@@ -10,11 +10,12 @@ COLORS = {'S': '#9eedff',
           }
 
 class Simulation:
-    def __init__(self, canvas):
+    def __init__(self, basis, canvas):
         self.t = 0
         self.q = []
         self.next = None
         self.canvas = canvas
+        self.basis = basis
 
 
     def detectCollision(self, p, q):
@@ -62,7 +63,7 @@ class Simulation:
     def addParticles(self, count):
         particles = []
         for i in range(count):
-            hasMovement = False if np.random.uniform(100) < STATIC_PEOPLE_PERCENTAGE else True
+            hasMovement = False if np.random.uniform(100) < self.mobility else True
             p = Particle(np.random.rand(2),
                          (2*np.random.rand(2)-1) * SPEED,
                          COLORS['S'],
@@ -74,8 +75,9 @@ class Simulation:
     def cancel(self):
         self.canvas.after_cancel(self._job)
 
-    def simulate(self, n, np):
+    def simulate(self, n, np, mobility):
         self.n = n
+        self.mobility = mobility
         # self.addParticles(NUMBER_OF_PEOPLE)
         self.addParticles(n)
 
@@ -86,6 +88,11 @@ class Simulation:
         self.loop()
 
     def loop(self):
+        print(self.t)
+        if self.t > TOTAL_TICKS:
+            print("Stopp nú")
+            self.canvas.after_cancel(self._job)
+            self.basis.stop_simulation()
         self.canvas.delete('all')
         # Update positions
         [particle.step() for particle in self.particles]

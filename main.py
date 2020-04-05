@@ -5,12 +5,13 @@ from tkinter import font  as tkfont
 from options import *
 from simulation import Simulation
 
+
 class Basis(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
         self.container = tk.Frame(self)
-        self.container.grid(row=0, column=0)
+        self.container.grid(row=0, column=0, columnspan=4)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
         self.label = tk.Label(self, text="COVID-19 hermir", font = tkfont.Font(family='Helvetica', size=18, weight="bold"))
@@ -34,6 +35,13 @@ class Basis(tk.Tk):
         self.n0_label.grid(row=3, column=2)
         self.n0.grid(row=4, column=2)
 
+        # Mobility
+        self.mobility_label = tk.Label(self, text="Hreyfanleiki (samkomubann)", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
+        self.mobility = tk.Scale(self, from_=0, to=100, orient="horizontal")
+        self.mobility_label.grid(row=3, column=3)
+        self.mobility.grid(row=4, column=3)
+
+        # Start and stop
         self.begin = tk.Button(self, text="Byrja", command= self.start_simulation)
         self.begin.grid(row=5, columnspan=2)
         self.stop = tk.Button(self, text="Hætta", command=self.stop_simulation)
@@ -44,12 +52,13 @@ class Basis(tk.Tk):
         self.begin.configure(state='disabled')
         self.pop.configure(state='disabled')
         self.stop.configure(state='normal')
-        self.s = Simulation(self.canvas)
-        self.s.simulate(self.pop.get(), self.n0.get())
+        self.s = Simulation(self, self.canvas)
+        self.s.simulate(self.pop.get(), self.n0.get(), self.mobility.get())
 
     def stop_simulation(self):
         self.begin.configure(state='normal')
         self.pop.configure(state='normal')
+        self.stop.configure(state='disabled')
         self.s.cancel()
         self.canvas.delete('all')
 
