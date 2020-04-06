@@ -1,8 +1,8 @@
 import numpy as np
 from options import *
-import csv
 from particle import Particle
 from options import *
+import pandas as pd
 
 COLORS = {'S': '#9eedff',
           'I': '#ffc4b8',
@@ -21,6 +21,8 @@ class Simulation:
             "I":0,
             "R":0
         }
+        self.data = np.zeros((TOTAL_TICKS,4))
+        self.data = pd.DataFrame(data=self.data, columns=["x", "S", "I", "R"])
 
 
     def detectCollision(self, p, q):
@@ -94,17 +96,15 @@ class Simulation:
         for i in range(np):
             self.infect(self.particles[i])
 
-        self.fieldnames = ["x", "S", "I", "R"]
-        with open('gogn.csv', 'w+') as csv_file:
-            csv_writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
-            csv_writer.writeheader()
-
         self.loop()
 
     def loop(self):
-        # if self.t > TOTAL_TICKS:
-        #     self.canvas.after_cancel(self._job)
-        #     self.basis.stop_simulation()
+        print(self.t)
+        if self.t > TOTAL_TICKS:
+            print("Stopp")
+            self.cancel()
+            self.basis.stop_simulation()
+
         self.canvas.delete('all')
         # Update positions
         [particle.step() for particle in self.particles]
@@ -125,16 +125,13 @@ class Simulation:
             if event[0] == self.t:
                 self.recover(event[1])
 
-        with open('gogn.csv', 'a') as csv_file:
-            csv_writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
-
-            info = {
-                "x": self.t,
-                "S": self.stats["S"],
-                "I": self.stats["I"],
-                "R": self.stats["R"]
-            }
-
-            csv_writer.writerow(info)
-
+        # self.stats[self.t, :] = np.array((self.t,
+        #                                   self.stats['S'],
+        #                                   self.stats['I'],
+        #                                   self.stats['R']))
+        self.data = self.data.append({
+                                      'x': self.t,
+                                      'S': self.stats['S'],
+                                      'I': self.stats['I'],
+                                      'R': self.stats['R']}, ignore_index=True)
         self._job = self.canvas.after(int(1000/FRAMES_PER_SECOND), self.loop)

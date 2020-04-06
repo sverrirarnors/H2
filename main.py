@@ -32,6 +32,7 @@ class Basis(tk.Tk):
         self.label.grid(row=1, columnspan=4)
         self.canvas.grid(row=2, columnspan=4)
         self.canvas.config(bg="white")
+        self.s = Simulation(self, self.canvas)
 
 
         # Population-slider
@@ -105,20 +106,20 @@ class Basis(tk.Tk):
         self.canvas.delete('all')
 
     def animate(self, i):
-        data = pd.read_csv('gogn.csv')
-        x = data['x']
-        susceptible = data['S']
-        infected = data['I']
-        removed = data['R']
+        # data = pd.read_csv('gogn.csv')
+        # x = self.s.data[0,:]
+        # susceptible = self.s.data[1,:]
+        # infected = self.s.data[2,:]
+        # removed = self.s.data[3,:]
 
-        self.S_label_var.set(f'Heilbrigðir: {str(susceptible[len(susceptible)-1])}')
-        self.I_label_var.set(f'Veikir: {str(infected[len(infected)-1])}')
-        self.R_label_var.set(f'Náð bata: {str(removed[len(removed)-1])}')
+        # self.S_label_var.set(f'Heilbrigðir: {str(susceptible[len(susceptible)-1])}')
+        # self.I_label_var.set(f'Veikir: {str(infected[len(infected)-1])}')
+        # self.R_label_var.set(f'Náð bata: {str(removed[len(removed)-1])}')
         self.plot.cla()
-        self.plot.stackplot(x,
-                            infected,
-                            susceptible,
-                            removed,
+        self.plot.stackplot(self.s.data.index.values,
+                            self.s.data['I'],
+                            self.s.data['S'],
+                            self.s.data['R'],
                             colors=[COLORS['I'], COLORS['S'], COLORS['R']])
 
 if __name__ == "__main__":
