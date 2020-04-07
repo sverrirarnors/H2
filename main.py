@@ -38,11 +38,15 @@ class Basis(tk.Tk):
         # Population-slider
         self.pop_label = tk.Label(self.container, text="Fólksfjöldi", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
         self.pop_label.grid(row=3, columnspan=2)
-        self.pop = tk.Scale(self.container, from_=50, to=150, orient="horizontal")
+        self.pop = tk.Scale(self.container, from_=25, to=150, cursor_="50", orient="horizontal")
         self.pop.grid(row=4, columnspan=2)
 
         # Number of infected
-        self.n0_label = tk.Label(self.container, text="Fjöldi smitaðra", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
+        self.n0_label = tk.Label(self.container,
+                                 text="Fjöldi smitaðra",
+                                 font=tkfont.Font(family='Helvetica',
+                                 size=18,
+                                 weight="normal"))
         self.n0 = tk.Scale(self.container, from_=1, to=10, orient="horizontal")
         self.n0_label.grid(row=3, column=2)
         self.n0.grid(row=4, column=2)
@@ -112,11 +116,11 @@ class Basis(tk.Tk):
         # infected = self.s.data[2,:]
         # removed = self.s.data[3,:]
 
-        # self.S_label_var.set(f'Heilbrigðir: {str(susceptible[len(susceptible)-1])}')
-        # self.I_label_var.set(f'Veikir: {str(infected[len(infected)-1])}')
-        # self.R_label_var.set(f'Náð bata: {str(removed[len(removed)-1])}')
+        self.S_label_var.set(f'Heilbrigðir: {int(self.s.data["S"].iloc[-1])}')
+        self.I_label_var.set(f'Veikir: {int(self.s.data["I"].iloc[-1])}')
+        self.R_label_var.set(f'Náð bata: {int(self.s.data["R"].iloc[-1])}')
         self.plot.cla()
-        self.plot.stackplot(self.s.data.index.values,
+        self.plot.stackplot(self.s.data['x'],
                             self.s.data['I'],
                             self.s.data['S'],
                             self.s.data['R'],

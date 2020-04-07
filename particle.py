@@ -6,7 +6,7 @@ COLORS = {'S': '#9eedff',
 from options import RADIUS, DIMENSIONS
 # Takes in r=np.array((x,y)), v.np.array((vx,vy))
 class Particle:
-    def __init__(self, r, v, color, canvas, hasMovement = True):
+    def __init__(self, r, v, color, canvas, hasMovement=True, boundaries=[0, 0.5, 0, 0.5] ):
         self.r = r
         self.v = v
         self.status = "S"
@@ -15,10 +15,10 @@ class Particle:
 
     def step(self):
         self.shape = self.canvas.create_oval(self.r[0]*DIMENSIONS['width'] - RADIUS,
-                                        self.r[1]*DIMENSIONS['height'] - RADIUS,
-                                        self.r[0]*DIMENSIONS['width'] + RADIUS,
-                                        self.r[1]*DIMENSIONS['height'] + RADIUS,
-                                        fill = COLORS[self.status])
+                                             self.r[1]*DIMENSIONS['height'] - RADIUS,
+                                             self.r[0]*DIMENSIONS['width'] + RADIUS,
+                                             self.r[1]*DIMENSIONS['height'] + RADIUS,
+                                             fill=COLORS[self.status])
         if not self.hasMovement:
             return
 
@@ -27,5 +27,5 @@ class Particle:
             self.v[0] = -self.v[0]
         if self.r[1] < 0 or self.r[1] > 1:
             self.v[1] = -self.v[1]
-            
+
         self.r += self.v
