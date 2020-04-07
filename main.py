@@ -38,7 +38,7 @@ class Basis(tk.Tk):
         # Population-slider
         self.pop_label = tk.Label(self.container, text="Fólksfjöldi", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
         self.pop_label.grid(row=3, columnspan=2)
-        self.pop = tk.Scale(self.container, from_=25, to=150, cursor_="50", orient="horizontal")
+        self.pop = tk.Scale(self.container, from_=25, to=150, orient="horizontal")
         self.pop.grid(row=4, columnspan=2)
 
         # Number of infected

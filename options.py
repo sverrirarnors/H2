@@ -1,8 +1,8 @@
 # RADIUS = 0.01
-RADIUS = 7
+RADIUS = 3
 DIMENSIONS = {
-    'height': 600,
-    'width': 600,
+    'height': 800,
+    'width': 800,
 }
 NUMBER_OF_PEOPLE = 100
 STATIC_PEOPLE_PERCENTAGE = 25
