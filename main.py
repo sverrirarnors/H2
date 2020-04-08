@@ -38,7 +38,7 @@ class Basis(tk.Tk):
         # Population-slider
         self.pop_label = tk.Label(self.container, text="Fólksfjöldi", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
         self.pop_label.grid(row=3, columnspan=2)
-        self.pop = tk.Scale(self.container, from_=25, to=150, orient="horizontal")
+        self.pop = tk.Scale(self.container, from_=100, to=500, orient="horizontal")
         self.pop.grid(row=4, columnspan=2)
 
         # Number of infected
@@ -57,6 +57,19 @@ class Basis(tk.Tk):
         self.mobility_label.grid(row=3, column=3)
         self.mobility.grid(row=4, column=3)
 
+        # Collections
+        collections = [('1', 1), ('2', 2), ('4',4)]
+        self.collections = tk.IntVar()
+        self.collections_label = tk.Label(self.container, text="Fjöldi hólfa", font = tkfont.Font(family='Helvetica', size=18, weight="normal"))
+        self.collections_label.grid(row=3, column=4)
+        self.collections_frame = tk.Frame(self)
+        self.collections_frame.grid(row=2, column=2)
+        for val, num in collections:
+            tk.Radiobutton(self.collections_frame,
+                  text=num,
+                  variable=self.collections,
+                  value=val).pack(side='left', anchor=tk.W)
+
         # Start and stop
         self.begin = tk.Button(self.container, text="Byrja", command= self.start_simulation)
         self.begin.grid(row=5, columnspan=2)
@@ -65,7 +78,6 @@ class Basis(tk.Tk):
         self.stop.grid(row=5, column = 1, columnspan=2)
 
         # Graph
-        # plt.style.use("ggplot")
         self.fig = plt.Figure()
         self.plot = self.fig.add_subplot(111)
         self.plot.axes.get_xaxis().set_visible(False)
@@ -98,7 +110,7 @@ class Basis(tk.Tk):
         self.mobility.configure(state='disabled')
         self.stop.configure(state='normal')
         self.s = Simulation(self, self.canvas)
-        self.s.simulate(self.pop.get(), self.n0.get(), self.mobility.get())
+        self.s.simulate(self.pop.get(), self.n0.get(), self.mobility.get(), self.collections.get())
 
     def stop_simulation(self):
         self.begin.configure(state='normal')

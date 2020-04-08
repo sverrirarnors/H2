@@ -1,46 +1,50 @@
 import numpy as np
 from options import *
-import cProfile
-cp = cProfile.Profile()
+from scipy import stats
 
-COLORS = {'S': '#9eedff',
-          'I': '#ffc4b8',
-          'R': '#91ffd7'
+COLORS = {'S': '#A3E0FF',
+          'I': '#FFB0B7',
+          'R': '#8AFFA5'
           }
+# Boundaries on the form [x1, x2, y1, y2]
 class Collection:
-    def __init__(self, simulation):
-        n = 500
-        self.r = np.random.rand(n, 2)
-        self.v = (2 * np.random.rand(n, 2) - 1) * SPEED
-        self.status = np.repeat('S', n)
-        self.has_movement = np.ones(n, dtype=bool)
-        self.recovery_time = np.full((n, 2), np.inf)
+    def __init__(self, simulation, parameters, boundaries=[0, 1, 0, 1]):
+        self.boundaries = boundaries
+        self.r = np.random.rand(parameters['n'], 2)
+        # Scale r vectors to right boundaries
+        self.r = np.column_stack((
+                                  (self.r[:, 0] * (self.boundaries[1] - self.boundaries[0])) + self.boundaries[0],
+                                  (self.r[:, 1] * (self.boundaries[3] - self.boundaries[2])) + self.boundaries[2]
+        ))
+        self.v = (2 * np.random.rand(parameters['n'], 2) - 1) * SPEED
+        self.status = np.repeat('S', parameters['n'])
+        self.has_movement = np.ones(parameters['n'], dtype=bool)
+        self.recovery_time = np.full(parameters['n'], -1)
+        self.contagiousness = np.full(parameters['n'], 20)
         self.simulation = simulation
+        self.simulation.stats['S'] += parameters['n']
 
-        self.simulation.stats['S'] += n
+        for i in range(parameters['n0']):
+            self.infect(i)
 
-        self.status[0] = "I"
+
+        for i in np.random.rand(3):
+            self.contagiousness[int(i * parameters['n0'])] = 100
 
         for i in range(len(self.has_movement)):
-            self.has_movement[i] = False if np.random.uniform(100) < STATIC_PEOPLE_PERCENTAGE else True
+            self.has_movement[i] = False if np.random.uniform(100) < parameters['mobility'] else True
 
     def doColisions(self):
-        cp.enable()
         r = np.column_stack((
                              self.r[:, 0] * DIMENSIONS['width'],
                              self.r[:, 1] * DIMENSIONS['height']))
-        # r = np.zeros((100, 2))
-        # r[:, 0] = self.r[:, 0] * DIMENSIONS['width']
-        # r[:, 1] = self.r[:, 1] * DIMENSIONS['height']
         for i in range(len(self.r)):
             distances = np.hypot(*(r - r[i, :]).T)
-            to_resolve = np.argwhere(distances[:] < RADIUS)
+            to_resolve = np.argwhere(distances[:] < RADIUS * 2)
 
             for j in to_resolve:
                 if i != j[0]:
                     self.collide(i, j[0])
-        cp.disable()
-        cp.print_stats()
 
 
     def collide(self, a, b):
@@ -51,36 +55,40 @@ class Collection:
 
         # Infect
         if self.status[a] == "S" and self.status[b] == "I":
-            self.infect(a)
+            if self.contagiousness[b] > np.random.uniform(100):
+                self.infect(a)
         elif self.status[a] == "S" and self.status[b] == "I":
-            self.infect(b)
+            if self.contagiousness[a] > np.random.uniform(100):
+                self.infect(b)
 
     def step(self):
+
         # Check for colission with walls
-        left = np.argwhere(self.r[:, 0] < 0)
+        left = np.argwhere(self.r[:, 0] < self.boundaries[0])
         self.v[left, 0] = self.v[left, 0] * -1
 
-        right = np.argwhere(self.r[:, 0] > 1)
+        right = np.argwhere(self.r[:, 0] > self.boundaries[1])
         self.v[right, 0] = self.v[right, 0] * -1
 
-        top = np.argwhere(self.r[:, 1] > 1)
+        top = np.argwhere(self.r[:, 1] < self.boundaries[3])
         self.v[top, 1] = self.v[top, 1] * -1
 
-        bottom = np.argwhere(self.r[:, 1] < 0)
+        bottom = np.argwhere(self.r[:, 1] > self.boundaries[2])
         self.v[bottom, 1] = self.v[bottom, 1] * -1
 
-        self.r = self.r + self.v
+        to_move = self.has_movement[:] == True
+        self.r[to_move] = self.r[to_move] + self.v[to_move]
 
         # Draw particles
         [self.draw(i) for i in range(len(self.r))]
-
         # Recover
         recovered = np.argwhere(self.recovery_time == self.simulation.t)
         [self.recover(i) for i in recovered]
 
     def infect(self, index):
         self.status[index] = "I"
-        self.recovery_time[index] = self.simulation.t + TIME_TO_RECOVER
+        X = stats.beta(2,5) # Beta random variable 
+        self.recovery_time[index] = int(self.simulation.t + X.rvs()*TIME_TO_RECOVER)
         self.simulation.infect()
 
     # Called from simulation class
@@ -88,9 +96,40 @@ class Collection:
         self.status[index] = "R"
         self.simulation.recover()
 
+    def color(self, index):
+        if self.status[index] == "S":
+            return COLORS['S']
+        elif self.status[index] == 'R':
+            return COLORS['R']
+        elif self.status[index] == 'I':
+            if self.contagiousness[index] > 70:
+                return "#300101"
+            else:
+                return COLORS['I']
     def draw(self, index):
         self.simulation.canvas.create_oval(self.r[index, 0] * DIMENSIONS['width'] - RADIUS,
                                            self.r[index, 1] * DIMENSIONS['height'] - RADIUS,
                                            self.r[index, 0] * DIMENSIONS['width'] + RADIUS,
                                            self.r[index, 1] * DIMENSIONS['height'] + RADIUS,
-                                           fill=COLORS[self.status[index]])
+                                           fill=self.color(index))
+
+    def draw_boundaries(self):
+        self.simulation.canvas.create_line(self.boundaries[0] * DIMENSIONS['width'],
+                                           self.boundaries[2] * DIMENSIONS['height'],
+                                           self.boundaries[0] * DIMENSIONS['width'],
+                                           self.boundaries[3] * DIMENSIONS['height'])
+
+        self.simulation.canvas.create_line(self.boundaries[1] * DIMENSIONS['width'],
+                                           self.boundaries[2] * DIMENSIONS['height'],
+                                           self.boundaries[1] * DIMENSIONS['width'],
+                                           self.boundaries[3] * DIMENSIONS['height'])
+
+        self.simulation.canvas.create_line(self.boundaries[0] * DIMENSIONS['width'],
+                                           self.boundaries[2] * DIMENSIONS['height'],
+                                           self.boundaries[1] * DIMENSIONS['width'],
+                                           self.boundaries[2] * DIMENSIONS['height'])
+
+        self.simulation.canvas.create_line(self.boundaries[0] * DIMENSIONS['width'],
+                                           self.boundaries[3] * DIMENSIONS['height'],
+                                           self.boundaries[1] * DIMENSIONS['width'],
+                                           self.boundaries[3] * DIMENSIONS['height'])

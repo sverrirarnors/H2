@@ -3,11 +3,6 @@ from options import *
 from collection import Collection
 import pandas as pd
 
-COLORS = {'S': '#9eedff',
-          'I': '#ffc4b8',
-          'R': '#91ffd7'
-          }
-
 class Simulation:
     def __init__(self, basis, canvas):
         self.t = 0
@@ -34,13 +29,26 @@ class Simulation:
     def cancel(self):
         self.canvas.after_cancel(self._job)
 
-    def simulate(self, n, np, mobility):
-        self.n = n
-        self.mobility = mobility
-        # self.addParticles(NUMBER_OF_PEOPLE)
+    def simulate(self, n, np, mobility, collections):
+        parameters = {
+            'n': n,
+            'n0': np,
+            'mobility': mobility
+        }
+        if collections == 4:
+            self.collections = [Collection(self, parameters, [0, 0.5, 0, 0.5]),
+                                Collection(self, parameters, [0, 0.5, 0.5, 1]),
+                                Collection(self, parameters, [0.5, 1, 0, 0.5]),
+                                Collection(self, parameters, [0.5, 1, 0.5, 1])]
 
-        self.collections = [Collection(self)]
+        elif collections == 2:
+            self.collections = [Collection(self, parameters, [0, 0.5, 0, 1]), Collection(self, parameters, [0.5, 1, 0, 1])]
 
+        else:
+            self.collections = [Collection(self, parameters)]
+
+
+        self.collections_count = len(self.collections)
         self.loop()
 
     def loop(self):
@@ -56,14 +64,12 @@ class Simulation:
         for collection in self.collections:
             collection.doColisions()
             collection.step()
+            if self.collections_count > 1:
+                collection.draw_boundaries()
 
 
         self.t += 1
 
-        # self.stats[self.t, :] = np.array((self.t,
-        #                                   self.stats['S'],
-        #                                   self.stats['I'],
-        #                                   self.stats['R']))
         self.data = self.data.append({
                                       'x': self.t,
                                       'S': self.stats['S'],
