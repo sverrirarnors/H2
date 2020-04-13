@@ -36,10 +36,13 @@ class Simulation:
             'mobility': mobility
         }
         if collections == 4:
-            self.collections = [Collection(self, parameters, [0, 0.5, 0, 0.5]),
-                                Collection(self, parameters, [0, 0.5, 0.5, 1]),
-                                Collection(self, parameters, [0.5, 1, 0, 0.5]),
-                                Collection(self, parameters, [0.5, 1, 0.5, 1])]
+            coordinates = [[0, 0.5, 0, 0.5], [0, 0.5, 0.5, 1], [0.5, 1, 0, 0.5], [0.5, 1, 0.5, 1]]
+            ratios = [0.705, 0.152, 0.106, 0.037]
+            self.collections = []
+            for coordinate, ratio in zip(coordinates, ratios):
+                self.collections += Collection(self,
+                                               {'n': int(n * ratio), 'n0': np, 'mobility': mobility},
+                                               coordinate)
 
         elif collections == 2:
             self.collections = [Collection(self, parameters, [0, 0.5, 0, 1]), Collection(self, parameters, [0.5, 1, 0, 1])]
