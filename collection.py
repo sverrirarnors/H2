@@ -24,7 +24,7 @@ class Collection:
         self.simulation = simulation
         self.simulation.stats['S'] += parameters['n']
 
-        for i in range(parameters['n0']):
+        for i in np.random.randint(parameters['n'], size=parameters['n0']):
             self.infect(i)
 
 
@@ -113,23 +113,42 @@ class Collection:
                                            self.r[index, 1] * DIMENSIONS['height'] + RADIUS,
                                            fill=self.color(index))
 
-    def draw_boundaries(self):
-        self.simulation.canvas.create_line(self.boundaries[0] * DIMENSIONS['width'],
-                                           self.boundaries[2] * DIMENSIONS['height'],
-                                           self.boundaries[0] * DIMENSIONS['width'],
-                                           self.boundaries[3] * DIMENSIONS['height'])
+    def draw_boundaries(self, dash=None):
 
-        self.simulation.canvas.create_line(self.boundaries[1] * DIMENSIONS['width'],
-                                           self.boundaries[2] * DIMENSIONS['height'],
-                                           self.boundaries[1] * DIMENSIONS['width'],
-                                           self.boundaries[3] * DIMENSIONS['height'])
+        # Coordinates of the four lines for each collection
+        lines = [[0,2,0,3],[1,2,1,3],[0,2,1,2],[0,3,1,3]]
 
-        self.simulation.canvas.create_line(self.boundaries[0] * DIMENSIONS['width'],
-                                           self.boundaries[2] * DIMENSIONS['height'],
-                                           self.boundaries[1] * DIMENSIONS['width'],
-                                           self.boundaries[2] * DIMENSIONS['height'])
+        for line in lines:
+            self.simulation.canvas.create_line(self.boundaries[line[0]] * DIMENSIONS['width'],
+                                               self.boundaries[line[1]] * DIMENSIONS['height'],
+                                               self.boundaries[line[2]] * DIMENSIONS['width'],
+                                               self.boundaries[line[3]] * DIMENSIONS['height'], dash=dash)
 
-        self.simulation.canvas.create_line(self.boundaries[0] * DIMENSIONS['width'],
-                                           self.boundaries[3] * DIMENSIONS['height'],
-                                           self.boundaries[1] * DIMENSIONS['width'],
-                                           self.boundaries[3] * DIMENSIONS['height'])
+    def receive_particle(self, status, has_movement, contagiousness, recovery_time):
+        r = np.random.rand(1,2)
+        v = 2 * (np.random.rand(1, 2) - 1) * SPEED
+        r[:, 0] = (r[:, 0] * (self.boundaries[1] - self.boundaries[0])) + self.boundaries[0]
+        r[:, 1] = (r[:, 1] * (self.boundaries[3] - self.boundaries[2])) + self.boundaries[2]
+
+        self.r = np.append(self.r, r, axis=0)
+        self.v = np.append(self.v, v, axis=0)
+        self.status = np.append(self.status, status)
+        self.has_movement = np.append(self.has_movement, has_movement)
+        self.contagiousness = np.append(self.contagiousness, contagiousness)
+        self.recovery_time = np.append(self.recovery_time, recovery_time)
+
+    def remove_particle(self, i):
+        print(self.status)
+        status = self.status[i]
+        has_movement = self.has_movement[i]
+        contagiousness = self.contagiousness[i]
+        recovery_time = self.recovery_time[i]
+
+        self.r = np.delete(self.r, i, axis=0)
+        self.v = np.delete(self.v, i, axis=0)
+        self.status = np.delete(self.status, i, axis=0)
+        self.has_movement = np.delete(self.has_movement, i, axis=0)
+        self.contagiousness = np.delete(self.contagiousness, i, axis=0)
+        self.recovery_time = np.delete(self.recovery_time, i, axis=0)
+
+        return status, has_movement, contagiousness, recovery_time

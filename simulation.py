@@ -65,9 +65,13 @@ class Simulation:
             collection.doColisions()
             collection.step()
             if self.collections_count > 1:
+                if 5 < np.random.uniform(100):
+                    print("skipti")
+                    i = np.random.randint(0, len(self.collections))
+                    self.collections[i].receive_particle(*self.collections[i-1].remove_particle(0))
                 collection.draw_boundaries()
 
-
+        print(self.t)
         self.t += 1
 
         self.data = self.data.append({
