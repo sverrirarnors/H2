@@ -35,17 +35,22 @@ class Simulation:
             'n0': np,
             'mobility': mobility
         }
+        self.collections = []
         if collections == 4:
             coordinates = [[0, 0.5, 0, 0.5], [0, 0.5, 0.5, 1], [0.5, 1, 0, 0.5], [0.5, 1, 0.5, 1]]
-            ratios = [0.705, 0.152, 0.106, 0.037]
-            self.collections = []
+            ratios = [0.152, 0.705, 0.037, 0.106]
             for coordinate, ratio in zip(coordinates, ratios):
-                self.collections += Collection(self,
-                                               {'n': int(n * ratio), 'n0': np, 'mobility': mobility},
-                                               coordinate)
+                self.collections.append(Collection(self,
+                                                   {'n': int(n * ratio), 'n0': np, 'mobility': mobility},
+                                                   coordinate))
 
         elif collections == 2:
-            self.collections = [Collection(self, parameters, [0, 0.5, 0, 1]), Collection(self, parameters, [0.5, 1, 0, 1])]
+            coordinates = [[0, 0.5, 0, 1], [0.5, 1, 0, 1]]
+            ratios = [0.64, 0.36]
+            for coordinate, ratio in zip(coordinates, ratios):
+                self.collections.append(Collection(self,
+                                                   {'n': int(n * ratio), 'n0': np, 'mobility': mobility},
+                                                   coordinate))
 
         else:
             self.collections = [Collection(self, parameters)]
@@ -63,18 +68,23 @@ class Simulation:
 
         self.canvas.delete('all')
 
+        self.rt = np.array([])
         # Do everything inside collections
         for collection in self.collections:
             collection.doColisions()
             collection.step()
+            self.rt = np.append(self.rt, collection.get_rt())
             if self.collections_count > 1:
-                if 5 < np.random.uniform(100):
-                    print("skipti")
-                    i = np.random.randint(0, len(self.collections))
+                i = np.random.randint(0, len(self.collections))
+                population_limit = 3
+                can_give = len(self.collections[i-1].r) > population_limit
+                if 2 > np.random.uniform(100) and can_give:
                     self.collections[i].receive_particle(*self.collections[i-1].remove_particle(0))
                 collection.draw_boundaries()
 
-        print(self.t)
+
+        print("Meðaltal", np.average(self.rt))
+        print("Hámarks-smitari", np.amax(self.rt))
         self.t += 1
 
         self.data = self.data.append({

@@ -18,9 +18,13 @@ class Collection:
         ))
         self.v = (2 * np.random.rand(parameters['n'], 2) - 1) * SPEED
         self.status = np.repeat('S', parameters['n'])
+        # Create array of length n with all values True
         self.has_movement = np.ones(parameters['n'], dtype=bool)
         self.recovery_time = np.full(parameters['n'], -1)
         self.contagiousness = np.full(parameters['n'], 20)
+        self.rt = np.zeros(parameters['n'])
+        self.time_to_infect = np.full(parameters['n'], -1)
+
         self.simulation = simulation
         self.simulation.stats['S'] += parameters['n']
 
@@ -55,10 +59,12 @@ class Collection:
 
         # Infect
         if self.status[a] == "S" and self.status[b] == "I":
-            if self.contagiousness[b] > np.random.uniform(100):
+            if self.contagiousness[b] > np.random.uniform(100) and self.simulation.t > self.time_to_infect[b]:
+                self.rt[b] += 1
                 self.infect(a)
-        elif self.status[a] == "S" and self.status[b] == "I":
-            if self.contagiousness[a] > np.random.uniform(100):
+        elif self.status[b] == "S" and self.status[a] == "I":
+            if self.contagiousness[a] > np.random.uniform(100) and self.simulation.t > self.time_to_infect[a]:
+                self.rt[a] += 1
                 self.infect(b)
 
     def step(self):
@@ -87,8 +93,9 @@ class Collection:
 
     def infect(self, index):
         self.status[index] = "I"
-        X = stats.beta(2,5) # Beta random variable 
+        X = stats.beta(2, 5) # Beta random variable 
         self.recovery_time[index] = int(self.simulation.t + X.rvs()*TIME_TO_RECOVER)
+        self.time_to_infect[index] = int(self.simulation.t + X.rvs()*TIME_TO_INFECT)
         self.simulation.infect()
 
     # Called from simulation class
@@ -124,7 +131,7 @@ class Collection:
                                                self.boundaries[line[2]] * DIMENSIONS['width'],
                                                self.boundaries[line[3]] * DIMENSIONS['height'], dash=dash)
 
-    def receive_particle(self, status, has_movement, contagiousness, recovery_time):
+    def receive_particle(self, status, has_movement, contagiousness, recovery_time, rt, time_to_infect):
         r = np.random.rand(1,2)
         v = 2 * (np.random.rand(1, 2) - 1) * SPEED
         r[:, 0] = (r[:, 0] * (self.boundaries[1] - self.boundaries[0])) + self.boundaries[0]
@@ -136,19 +143,32 @@ class Collection:
         self.has_movement = np.append(self.has_movement, has_movement)
         self.contagiousness = np.append(self.contagiousness, contagiousness)
         self.recovery_time = np.append(self.recovery_time, recovery_time)
+        self.time_to_infect = np.append(self.time_to_infect, time_to_infect)
+        self.rt = np.append(self.rt, rt)
 
     def remove_particle(self, i):
-        print(self.status)
         status = self.status[i]
         has_movement = self.has_movement[i]
         contagiousness = self.contagiousness[i]
         recovery_time = self.recovery_time[i]
+        time_to_infect = self.time_to_infect[i]
+        rt = self.rt[i]
 
+        # for vector in (r, v, status, has_movement, contagiousness, recovery_time, time_to_infect, rt):
+        #     locals()["self." + vector.__name__] = np.delete(locals()["self." + vector.__name__], i, axis=0)
         self.r = np.delete(self.r, i, axis=0)
         self.v = np.delete(self.v, i, axis=0)
         self.status = np.delete(self.status, i, axis=0)
         self.has_movement = np.delete(self.has_movement, i, axis=0)
         self.contagiousness = np.delete(self.contagiousness, i, axis=0)
         self.recovery_time = np.delete(self.recovery_time, i, axis=0)
+        self.time_to_infect = np.delete(self.time_to_infect, i, axis=0)
+        self.rt = np.delete(self.rt, i, axis=0)
 
-        return status, has_movement, contagiousness, recovery_time
+        return status, has_movement, contagiousness, recovery_time, time_to_infect, rt
+
+    # Spyrja Stein
+    def get_rt(self):
+        infected = np.argwhere(self.status[:] == "I")
+        removed = np.argwhere(self.status[:] == "R")
+        return np.append(self.rt[infected], self.rt[removed])
