@@ -2,15 +2,16 @@ import numpy as np
 from options import *
 from scipy import stats
 
-COLORS = {'S': '#A3E0FF',
-          'I': '#FFB0B7',
-          'R': '#8AFFA5'
+COLORS = {'S': '#3D51FF',
+          'I': '#FF575B',
+          'R': '#30FF68'
           }
 # Boundaries on the form [x1, x2, y1, y2]
 class Collection:
     def __init__(self, simulation, parameters, boundaries=[0, 1, 0, 1]):
         self.boundaries = boundaries
         self.r = np.random.rand(parameters['n'], 2)
+
         # Scale r vectors to right boundaries
         self.r = np.column_stack((
                                   (self.r[:, 0] * (self.boundaries[1] - self.boundaries[0])) + self.boundaries[0],
@@ -24,7 +25,7 @@ class Collection:
         self.contagiousness = np.full(parameters['n'], 20)
         self.rt = np.zeros(parameters['n'])
         self.time_to_infect = np.full(parameters['n'], -1)
-        
+
         self.simulation = simulation
         self.simulation.stats['S'] += parameters['n']
 

@@ -17,6 +17,7 @@ class Simulation:
         }
         self.data = np.zeros((1,4))
         self.data = pd.DataFrame(data=self.data, columns=["x", "S", "I", "R"])
+        self.average_rt = 0
 
     def infect(self):
         self.stats["S"] -= 1
@@ -67,8 +68,7 @@ class Simulation:
             self.basis.stop_simulation()
 
         self.canvas.delete('all')
-
-        self.rt = np.array([])
+        self.rt = np.zeros([])
         # Do everything inside collections
         for collection in self.collections:
             collection.doColisions()
@@ -78,13 +78,13 @@ class Simulation:
                 i = np.random.randint(0, len(self.collections))
                 population_limit = 3
                 can_give = len(self.collections[i-1].r) > population_limit
-                if 2 > np.random.uniform(100) and can_give:
+                if TELEPORT_ODDS_PERCENTAGE > np.random.uniform(100) and can_give:
                     self.collections[i].receive_particle(*self.collections[i-1].remove_particle(0))
                 collection.draw_boundaries()
 
 
-        print("Meðaltal", np.average(self.rt))
-        print("Hámarks-smitari", np.amax(self.rt))
+        self.average_rt = np.average(self.rt)
+        # print("Hámarks-smitari", np.amax(self.rt))
         self.t += 1
 
         self.data = self.data.append({

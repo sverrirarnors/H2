@@ -11,11 +11,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import pandas as pd
 
-COLORS = {'S': '#9eedff',
-          'I': '#ffc4b8',
-          'R': '#91ffd7'
-          }
-
 class Basis(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -101,7 +96,9 @@ class Basis(tk.Tk):
         self.R_label = tk.Label(self.dashboard, textvariable=self.R_label_var)
         self.R_label.grid(row=3)
 
-
+        self.rt_label_var = tk.StringVar(self.dashboard)
+        self.rt_label = tk.Label(self.dashboard, textvariable=self.rt_label_var)
+        self.rt_label.grid(row=4)
 
     def start_simulation(self):
         self.begin.configure(state='disabled')
@@ -122,12 +119,8 @@ class Basis(tk.Tk):
         self.canvas.delete('all')
 
     def animate(self, i):
-        # data = pd.read_csv('gogn.csv')
-        # x = self.s.data[0,:]
-        # susceptible = self.s.data[1,:]
-        # infected = self.s.data[2,:]
-        # removed = self.s.data[3,:]
 
+        self.rt_label_var.set(f'Meðaltals RT: {self.s.average_rt:.2f}')
         self.S_label_var.set(f'Heilbrigðir: {int(self.s.data["S"].iloc[-1])}')
         self.I_label_var.set(f'Veikir: {int(self.s.data["I"].iloc[-1])}')
         self.R_label_var.set(f'Náð bata: {int(self.s.data["R"].iloc[-1])}')
