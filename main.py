@@ -118,7 +118,7 @@ class Basis(tk.Tk):
         self.n0.configure(state='normal')
         self.mobility.configure(state='normal')
         self.stop.configure(state='disabled')
-        self.s.cancel()
+        self.s.stop()
         self.canvas.delete('all')
 
     def animate(self, i):

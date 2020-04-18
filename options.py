@@ -11,7 +11,7 @@ TIME_TO_INFECT = 200
 SPEED = 0.005
 
 FRAMES_PER_SECOND = 30
-TOTAL_TICKS = 50
+MIN_TIME = 300
 
 
 def clamp(val, minimum=0, maximum=255):

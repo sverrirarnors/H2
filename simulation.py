@@ -15,7 +15,7 @@ class Simulation:
             "I":0,
             "R":0
         }
-        self.data = np.zeros((TOTAL_TICKS,4))
+        self.data = np.zeros((1,4))
         self.data = pd.DataFrame(data=self.data, columns=["x", "S", "I", "R"])
 
     def infect(self):
@@ -26,8 +26,8 @@ class Simulation:
         self.stats["I"] -= 1
         self.stats["R"] += 1
 
-    def cancel(self):
-        self.canvas.after_cancel(self._job)
+    def stop(self):
+        self.stop_simulation = True
 
     def simulate(self, n, np, mobility, collections):
         parameters = {
@@ -57,14 +57,14 @@ class Simulation:
 
 
         self.collections_count = len(self.collections)
+        self.stop_simulation = False
         self.loop()
 
     def loop(self):
-        # print(self.t)
-        # if self.t > TOTAL_TICKS:
-        #     print("Stopp")
-        #     self.cancel()
-        #     self.basis.stop_simulation()
+
+        if (self.t > MIN_TIME and self.data["I"].iloc[-1] < 1) or self.stop_simulation is True:
+            self.canvas.after_cancel(_job)
+            self.basis.stop_simulation()
 
         self.canvas.delete('all')
 
@@ -92,4 +92,5 @@ class Simulation:
                                       'S': self.stats['S'],
                                       'I': self.stats['I'],
                                       'R': self.stats['R']}, ignore_index=True)
-        self._job = self.canvas.after(int(1000/FRAMES_PER_SECOND), self.loop)
+
+        _job = self.canvas.after(int(1000/FRAMES_PER_SECOND), self.loop)

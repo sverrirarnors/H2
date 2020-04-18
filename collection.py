@@ -24,7 +24,7 @@ class Collection:
         self.contagiousness = np.full(parameters['n'], 20)
         self.rt = np.zeros(parameters['n'])
         self.time_to_infect = np.full(parameters['n'], -1)
-
+        
         self.simulation = simulation
         self.simulation.stats['S'] += parameters['n']
 
@@ -154,8 +154,6 @@ class Collection:
         time_to_infect = self.time_to_infect[i]
         rt = self.rt[i]
 
-        # for vector in (r, v, status, has_movement, contagiousness, recovery_time, time_to_infect, rt):
-        #     locals()["self." + vector.__name__] = np.delete(locals()["self." + vector.__name__], i, axis=0)
         self.r = np.delete(self.r, i, axis=0)
         self.v = np.delete(self.v, i, axis=0)
         self.status = np.delete(self.status, i, axis=0)
