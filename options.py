@@ -1,8 +1,8 @@
 # RADIUS = 0.01
 RADIUS = 5
 DIMENSIONS = {
-    'height': 800,
-    'width': 800,
+    'height': 600,
+    'width': 600,
 }
 COLORS = {'S': '#3D51FF',
           'I': '#FF575B',
