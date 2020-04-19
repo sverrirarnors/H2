@@ -2,10 +2,6 @@ import numpy as np
 from options import *
 from scipy import stats
 
-COLORS = {'S': '#3D51FF',
-          'I': '#FF575B',
-          'R': '#30FF68'
-          }
 # Boundaries on the form [x1, x2, y1, y2]
 class Collection:
     def __init__(self, simulation, parameters, boundaries=[0, 1, 0, 1]):
@@ -25,6 +21,8 @@ class Collection:
         self.contagiousness = np.full(parameters['n'], 20)
         self.rt = np.zeros(parameters['n'])
         self.time_to_infect = np.full(parameters['n'], -1)
+
+        self.blinking = [-1, 0, 0]
 
         self.simulation = simulation
         self.simulation.stats['S'] += parameters['n']
@@ -92,6 +90,9 @@ class Collection:
         recovered = np.argwhere(self.recovery_time == self.simulation.t)
         [self.recover(i) for i in recovered]
 
+        # Switch blinking state
+        self.blinking[2] = 0 if self.blinking[2] is 1 else 1
+
     def infect(self, index):
         self.status[index] = "I"
         X = stats.beta(2, 5) # Beta random variable 
@@ -105,6 +106,9 @@ class Collection:
         self.simulation.recover()
 
     def color(self, index):
+        if self.blinking[0] == index and self.blinking[1] > self.simulation.t and self.blinking[2] == 1:
+            return COLORS['B']
+
         if self.status[index] == "S":
             return COLORS['S']
         elif self.status[index] == 'R':
@@ -147,6 +151,8 @@ class Collection:
         self.time_to_infect = np.append(self.time_to_infect, time_to_infect)
         self.rt = np.append(self.rt, rt)
 
+        self.blinking = [len(self.rt)-1, self.simulation.t + 200, 1]
+
     def remove_particle(self, i):
         status = self.status[i]
         has_movement = self.has_movement[i]
@@ -166,7 +172,6 @@ class Collection:
 
         return status, has_movement, contagiousness, recovery_time, time_to_infect, rt
 
-    # Spyrja Stein
     def get_rt(self):
         infected = np.argwhere(self.status[:] == "I")
         removed = np.argwhere(self.status[:] == "R")

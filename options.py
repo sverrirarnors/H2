@@ -6,7 +6,8 @@ DIMENSIONS = {
 }
 COLORS = {'S': '#3D51FF',
           'I': '#FF575B',
-          'R': '#30FF68'
+          'R': '#30FF68',
+          'B': '#FFFB30'
           }
 NUMBER_OF_PEOPLE = 100
 STATIC_PEOPLE_PERCENTAGE = 25
