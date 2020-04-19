@@ -91,7 +91,7 @@ class Collection:
         [self.recover(i) for i in recovered]
 
         # Switch blinking state
-        self.blinking[2] = 0 if self.blinking[2] is 1 else 1
+        self.blinking[2] = 0 if self.blinking[2] == 1 else 1
 
     def infect(self, index):
         self.status[index] = "I"
@@ -170,7 +170,7 @@ class Collection:
         self.time_to_infect = np.delete(self.time_to_infect, i, axis=0)
         self.rt = np.delete(self.rt, i, axis=0)
 
-        return status, has_movement, contagiousness, recovery_time, time_to_infect, rt
+        return status, has_movement, contagiousness, recovery_time, rt, time_to_infect
 
     def get_rt(self):
         infected = np.argwhere(self.status[:] == "I")
