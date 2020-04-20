@@ -1,4 +1,5 @@
 import tkinter as tk
+# from tkinter import font as tkfont
 from options import COLORS
 
 # For plot
@@ -23,15 +24,15 @@ class Dashboard(tk.Frame):
 
         self.stats_container = tk.Frame(master=self)
         self.S_label_var = tk.StringVar(self)
-        self.S_label = tk.Label(self.stats_container, textvariable=self.S_label_var)
+        self.S_label = tk.Label(self.stats_container, textvariable=self.S_label_var, fg=COLORS['S'])
         self.S_label.pack(anchor=tk.W)
 
         self.I_label_var = tk.StringVar(self)
-        self.I_label = tk.Label(self.stats_container, textvariable=self.I_label_var)
+        self.I_label = tk.Label(self.stats_container, textvariable=self.I_label_var, fg=COLORS['I'])
         self.I_label.pack(anchor=tk.W)
 
         self.R_label_var = tk.StringVar(self)
-        self.R_label = tk.Label(self.stats_container, textvariable=self.R_label_var)
+        self.R_label = tk.Label(self.stats_container, textvariable=self.R_label_var, fg=COLORS['R'])
         self.R_label.pack(anchor=tk.W)
 
         self.rt_label_var = tk.StringVar(self)

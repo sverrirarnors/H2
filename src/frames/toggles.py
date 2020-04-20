@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import font as tkfont
 from simulation import Simulation
 
+
 class Toggles(tk.Frame):
     def start_simulation(self):
         self.begin.configure(state='disabled')
@@ -35,7 +36,7 @@ class Toggles(tk.Frame):
                                   font=tkfont.Font(family='Helvetica',
                                   size=18,
                                   weight="normal"))
-        self.pop_label.grid(row=1, columnspan=2)
+        self.pop_label.grid(row=1, columnspan=2, pady=10)
         self.pop = tk.Scale(self, from_=100, to=500, orient="horizontal")
         self.pop.grid(row=2, columnspan=2)
 
@@ -51,7 +52,7 @@ class Toggles(tk.Frame):
 
         # Mobility
         self.mobility_label = tk.Label(self,
-                                       text="Hreyfanleiki (samkomubann)",
+                                       text="Hlýða Víði (%)",
                                        font=tkfont.Font(family='Helvetica',
                                        size=18,
                                        weight="normal"))
@@ -80,8 +81,8 @@ class Toggles(tk.Frame):
 
 
         # Start and stop
-        self.begin = tk.Button(self, text="Byrja", command=self.start_simulation)
-        self.begin.grid(row=5, columnspan=2)
-        self.stop = tk.Button(self, text="Hætta", command=self.stop_simulation)
+        self.begin = tk.Button(self, text="Byrja", command=self.start_simulation, width=10)
+        self.begin.grid(row=5, column=2, pady=20)
+        self.stop = tk.Button(self, text="Hætta", command=self.stop_simulation, width=10)
         self.stop.configure(state='disabled')
-        self.stop.grid(row=5, column=1, columnspan=2)
+        self.stop.grid(row=5, column=3)

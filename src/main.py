@@ -14,15 +14,7 @@ class Basis(tk.Tk):
 
         self.container = tk.Frame(self)
         self.container.pack()
-        # self.container.grid_rowconfigure(0, weight=1)
-        # self.container.grid_columnconfigure(0, weight=1)
-        self.label = tk.Label(self.container,
-                              text="COVID-19 hermir",
-                              font=tkfont.Font(family='Helvetica',
-                              size=18,
-                              weight="bold"))
 
-        self.label.pack(anchor=tk.CENTER)
         self.left_div = tk.Frame(master=self.container)
         self.right_div = tk.Frame(master=self.container)
 
