@@ -32,11 +32,12 @@ class Simulation:
         self.stop_simulation = True
 
     # Takes in total population, total number of infected, and number of collections
-    def simulate(self, n, np, mobility, collections):
+    def simulate(self, n, np, mobility, collections, do_collisions):
         parameters = {
             'n': n,
             'n0': np,
-            'mobility': mobility
+            'mobility': mobility,
+            'do_collisions': do_collisions
         }
         self.collections = []
 
@@ -48,7 +49,7 @@ class Simulation:
             ratios = [0.152, 0.705, 0.037, 0.106]
             for coordinate, ratio in zip(coordinates, ratios):
                 self.collections.append(Collection(self,
-                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility},
+                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility, 'do_collisions': do_collisions},
                                                    coordinate))
 
         elif collections == 2:
@@ -56,7 +57,7 @@ class Simulation:
             ratios = [0.64, 0.36]
             for coordinate, ratio in zip(coordinates, ratios):
                 self.collections.append(Collection(self,
-                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility},
+                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility, 'elastic': do_collisions},
                                                    coordinate))
 
         else:

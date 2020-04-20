@@ -28,6 +28,7 @@ class Collection:
         # Third is the state of the blink (yellow or normal)
         self.blinking = [-1, 0, 0]
 
+        self.do_collisions = parameters['do_collisions']
         self.simulation = simulation
         self.simulation.stats['S'] += parameters['n']
 
@@ -59,8 +60,10 @@ class Collection:
     def collide(self, a, b):
         x = lambda ar, av, br, bv : av - (np.dot(av-bv, ar-br)/(np.linalg.norm(ar - br)**2))*(ar-br)
 
-        self.v[a, :] = x(self.r[a, :], self.v[a, :], self.r[b, :], self.v[b, :])
-        self.v[b, :] = x(self.r[b, :], self.v[b, :], self.r[a, :], self.v[a, :])
+        if self.do_collisions:
+            self.v[a, :] = x(self.r[a, :], self.v[a, :], self.r[b, :], self.v[b, :])
+            self.v[b, :] = x(self.r[b, :], self.v[b, :], self.r[a, :], self.v[a, :])
+            pass
 
         # Infect
         if self.status[a] == "S" and self.status[b] == "I":

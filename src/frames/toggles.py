@@ -15,7 +15,10 @@ class Toggles(tk.Frame):
         self.controller.s.simulate(self.pop.get(),
                                    self.n0.get(),
                                    self.mobility.get(),
-                                   self.collections.get())
+                                   self.collections.get(),
+                                   self.collisions_var.get())
+
+        print(self.collisions_var.get())
 
     def stop_simulation(self):
         self.begin.configure(state='normal')
@@ -47,7 +50,7 @@ class Toggles(tk.Frame):
                                  font=tkfont.Font(family='Helvetica',
                                  size=18,
                                  weight="normal"))
-        self.n0 = tk.Scale(self, from_=1, to=10, orient="horizontal")
+        self.n0 = tk.Scale(self, from_=2, to=10, orient="horizontal")
         self.n0_label.grid(row=1, column=2)
         self.n0.grid(row=2, column=2)
 
@@ -80,6 +83,9 @@ class Toggles(tk.Frame):
                            variable=self.collections,
                            value=val).pack(side='left', anchor=tk.W)
 
+        self.collisions_var = tk.BooleanVar(value=True)
+        self.collisions_checkbox= tk.Checkbutton(self, text="Árekstrar", variable=self.collisions_var)
+        self.collisions_checkbox.grid(row=3, column=2, pady=10)
 
         # Start and stop
         self.begin = tk.Button(self, text="Byrja", command=self.start_simulation, width=10)
