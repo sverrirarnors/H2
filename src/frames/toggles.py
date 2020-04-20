@@ -3,6 +3,7 @@ from tkinter import font as tkfont
 from simulation import Simulation
 
 
+# Frame for toggles
 class Toggles(tk.Frame):
     def start_simulation(self):
         self.begin.configure(state='disabled')

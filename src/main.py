@@ -1,13 +1,13 @@
 import tkinter as tk
-from tkinter import font  as tkfont
 
 from options import DIMENSIONS
 from simulation import Simulation
 
-#Import frames
+# Import frames
 from frames.dashboard import Dashboard
 from frames.toggles import Toggles
 
+# Expansion of tk.Tk class
 class Basis(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)

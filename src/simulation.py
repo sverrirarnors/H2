@@ -20,7 +20,6 @@ class Simulation:
         self.data = pd.DataFrame(data=self.data, columns=["x", "S", "I", "R"])
         self.average_rt = 0
 
-    # Increment
     def infect(self):
         self.stats["S"] -= 1
         self.stats["I"] += 1
@@ -32,6 +31,7 @@ class Simulation:
     def stop(self):
         self.stop_simulation = True
 
+    # Takes in total population, total number of infected, and number of collections
     def simulate(self, n, np, mobility, collections):
         parameters = {
             'n': n,
@@ -39,6 +39,10 @@ class Simulation:
             'mobility': mobility
         }
         self.collections = []
+
+        # Different cases for number of collections
+        # Coordinates is an array of relative coordinates on the form [x1, x2, y1, y2]
+        # Ratio is the ratio of the population each collection gets (based on Iceland's population)
         if collections == 4:
             coordinates = [[0, 0.5, 0, 0.5], [0, 0.5, 0.5, 1], [0.5, 1, 0, 0.5], [0.5, 1, 0.5, 1]]
             ratios = [0.152, 0.705, 0.037, 0.106]
@@ -58,35 +62,38 @@ class Simulation:
         else:
             self.collections = [Collection(self, parameters)]
 
-
         self.collections_count = len(self.collections)
         self.stop_simulation = False
         self.loop()
 
     def loop(self):
-
-        if (self.t > MIN_TIME and self.data["I"].iloc[-1] < 1) or self.stop_simulation is True:
+        # Check if we have to stop the simulation, stops if no particles are infected
+        if (MIN_TIME < self.t < MAX_TIME and self.data["I"].iloc[-1] < 1) or self.stop_simulation is True:
             self.canvas.after_cancel(_job)
             self.basis.stop_simulation()
 
         self.canvas.delete('all')
+        # Keep track of rt values for particles
         self.rt = np.zeros([])
         # Do everything inside collections
         for collection in self.collections:
             collection.doColisions()
             collection.step()
+            # Get all rt values from collection
             self.rt = np.append(self.rt, collection.get_rt())
+
             if self.collections_count > 1:
+                # Teleportation logic
                 i = np.random.randint(0, len(self.collections))
                 population_limit = 3
                 can_give = len(self.collections[i-1].r) > population_limit
                 if TELEPORT_ODDS_PERCENTAGE > np.random.uniform(100) and can_give:
                     self.collections[i].receive_particle(*self.collections[i-1].remove_particle(0))
+                # Draw lines for boundaries
                 collection.draw_boundaries()
 
 
         self.average_rt = np.average(self.rt)
-        # print("Hámarks-smitari", np.amax(self.rt))
         self.t += 1
 
         self.data = self.data.append({
@@ -95,4 +102,5 @@ class Simulation:
                                       'I': self.stats['I'],
                                       'R': self.stats['R']}, ignore_index=True)
 
+        # Loop again after 1/FPS sec
         _job = self.canvas.after(int(1000/FRAMES_PER_SECOND), self.loop)

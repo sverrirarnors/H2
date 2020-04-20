@@ -22,21 +22,27 @@ class Collection:
         self.rt = np.zeros(parameters['n'])
         self.time_to_infect = np.full(parameters['n'], -1)
 
+        # Keep track of particle blinking
+        # First element is index of blinking particle
+        # Second is absolute time when blinking stops
+        # Third is the state of the blink (yellow or normal)
         self.blinking = [-1, 0, 0]
 
         self.simulation = simulation
         self.simulation.stats['S'] += parameters['n']
 
+        # Infect particles
         for i in np.random.randint(parameters['n'], size=parameters['n0']):
             self.infect(i)
 
-
+        # Create super-spreaders
         for i in np.random.rand(3):
             self.contagiousness[int(i * parameters['n0'])] = 100
 
         for i in range(len(self.has_movement)):
             self.has_movement[i] = False if np.random.uniform(100) < parameters['mobility'] else True
 
+    # Do collision on all particles in collection
     def doColisions(self):
         r = np.column_stack((
                              self.r[:, 0] * DIMENSIONS['width'],
@@ -49,7 +55,7 @@ class Collection:
                 if i != j[0]:
                     self.collide(i, j[0])
 
-
+    #Collide particles with indexes a and b
     def collide(self, a, b):
         x = lambda ar, av, br, bv : av - (np.dot(av-bv, ar-br)/(np.linalg.norm(ar - br)**2))*(ar-br)
 
@@ -67,7 +73,6 @@ class Collection:
                 self.infect(b)
 
     def step(self):
-
         # Check for colission with walls
         left = np.argwhere(self.r[:, 0] < self.boundaries[0])
         self.v[left, 0] = self.v[left, 0] * -1
@@ -95,29 +100,32 @@ class Collection:
 
     def infect(self, index):
         self.status[index] = "I"
-        X = stats.beta(2, 5) # Beta random variable 
+        X = stats.beta(2, 5)  # Beta random variable 
         self.recovery_time[index] = int(self.simulation.t + X.rvs()*TIME_TO_RECOVER)
         self.time_to_infect[index] = int(self.simulation.t + X.rvs()*TIME_TO_INFECT)
         self.simulation.infect()
 
-    # Called from simulation class
     def recover(self, index):
         self.status[index] = "R"
         self.simulation.recover()
 
+    # Return color dynamically
     def color(self, index):
+        # Handle blinking
         if self.blinking[0] == index and self.blinking[1] > self.simulation.t and self.blinking[2] == 1:
             return COLORS['B']
 
+        # Normal colors
         if self.status[index] == "S":
             return COLORS['S']
         elif self.status[index] == 'R':
             return COLORS['R']
         elif self.status[index] == 'I':
-            if self.contagiousness[index] > 70:
+            if self.contagiousness[index] > 70:  # Super-spreader
                 return "#300101"
             else:
                 return COLORS['I']
+
     def draw(self, index):
         self.simulation.canvas.create_oval(self.r[index, 0] * DIMENSIONS['width'] - RADIUS,
                                            self.r[index, 1] * DIMENSIONS['height'] - RADIUS,
@@ -136,8 +144,16 @@ class Collection:
                                                self.boundaries[line[2]] * DIMENSIONS['width'],
                                                self.boundaries[line[3]] * DIMENSIONS['height'], dash=dash)
 
-    def receive_particle(self, status, has_movement, contagiousness, recovery_time, rt, time_to_infect):
-        r = np.random.rand(1,2)
+    # Takes in all neccesary data from particle and appends to current vectors
+    def receive_particle(self,
+                         status,
+                         has_movement,
+                         contagiousness,
+                         recovery_time,
+                         rt,
+                         time_to_infect):
+        # Create random position and velocity vectors
+        r = np.random.rand(1, 2)
         v = 2 * (np.random.rand(1, 2) - 1) * SPEED
         r[:, 0] = (r[:, 0] * (self.boundaries[1] - self.boundaries[0])) + self.boundaries[0]
         r[:, 1] = (r[:, 1] * (self.boundaries[3] - self.boundaries[2])) + self.boundaries[2]
@@ -151,8 +167,10 @@ class Collection:
         self.time_to_infect = np.append(self.time_to_infect, time_to_infect)
         self.rt = np.append(self.rt, rt)
 
+        # Make new particle blink
         self.blinking = [len(self.rt)-1, self.simulation.t + 200, 1]
 
+    # Remove particle i and return all its data
     def remove_particle(self, i):
         status = self.status[i]
         has_movement = self.has_movement[i]
@@ -172,7 +190,8 @@ class Collection:
 
         return status, has_movement, contagiousness, recovery_time, rt, time_to_infect
 
+    # Get all rt data from infected or recovered praticles
     def get_rt(self):
         infected = np.argwhere(self.status[:] == "I")
-        removed = np.argwhere(self.status[:] == "R")
-        return np.append(self.rt[infected], self.rt[removed])
+        recovered = np.argwhere(self.status[:] == "R")
+        return np.append(self.rt[infected], self.rt[recovered])
