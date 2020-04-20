@@ -57,7 +57,7 @@ class Simulation:
             ratios = [0.64, 0.36]
             for coordinate, ratio in zip(coordinates, ratios):
                 self.collections.append(Collection(self,
-                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility, 'elastic': do_collisions},
+                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility, 'do_collisions': do_collisions},
                                                    coordinate))
 
         else:
