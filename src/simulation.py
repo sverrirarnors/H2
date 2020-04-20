@@ -7,7 +7,6 @@ class Simulation:
     def __init__(self, basis, canvas):
         self.t = 0
         self.q = []
-        self.next = None
         self.canvas = canvas
         self.basis = basis
         self.stats = {
@@ -15,10 +14,13 @@ class Simulation:
             "I":0,
             "R":0
         }
+
+        # Initialize dataframe for stats
         self.data = np.zeros((1,4))
         self.data = pd.DataFrame(data=self.data, columns=["x", "S", "I", "R"])
         self.average_rt = 0
 
+    # Increment
     def infect(self):
         self.stats["S"] -= 1
         self.stats["I"] += 1
@@ -42,7 +44,7 @@ class Simulation:
             ratios = [0.152, 0.705, 0.037, 0.106]
             for coordinate, ratio in zip(coordinates, ratios):
                 self.collections.append(Collection(self,
-                                                   {'n': int(n * ratio), 'n0': np, 'mobility': mobility},
+                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility},
                                                    coordinate))
 
         elif collections == 2:
@@ -50,7 +52,7 @@ class Simulation:
             ratios = [0.64, 0.36]
             for coordinate, ratio in zip(coordinates, ratios):
                 self.collections.append(Collection(self,
-                                                   {'n': int(n * ratio), 'n0': np, 'mobility': mobility},
+                                                   {'n': int(n * ratio), 'n0': int(np * ratio), 'mobility': mobility},
                                                    coordinate))
 
         else:

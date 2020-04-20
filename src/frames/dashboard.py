@@ -22,7 +22,10 @@ class Dashboard(tk.Frame):
         self.graph.get_tk_widget().grid(column=1, columnspan=2, rowspan=2, row=1)
         self.ani = animation.FuncAnimation(self.fig, self.animate, interval=100)
 
+        # Seperate container for stats
         self.stats_container = tk.Frame(master=self)
+
+        # Labels for stats, identified by color
         self.S_label_var = tk.StringVar(self)
         self.S_label = tk.Label(self.stats_container, textvariable=self.S_label_var, fg=COLORS['S'])
         self.S_label.pack(anchor=tk.W)
@@ -41,7 +44,9 @@ class Dashboard(tk.Frame):
 
         self.stats_container.grid(row=3, column=1)
 
+    # Update graph and labels with new information
     def animate(self, i):
+        # Get data from inside simulation
         data = self.controller.s.data
         self.rt_label_var.set(f'Meðaltals RT: {self.controller.s.average_rt:.2f}')
         self.S_label_var.set(f'Heilbrigðir: {int(data["S"].iloc[-1])}')
