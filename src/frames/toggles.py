@@ -18,7 +18,6 @@ class Toggles(tk.Frame):
                                    self.collections.get(),
                                    self.collisions_var.get())
 
-        print(self.collisions_var.get())
 
     def stop_simulation(self):
         self.begin.configure(state='normal')
@@ -85,11 +84,11 @@ class Toggles(tk.Frame):
 
         self.collisions_var = tk.BooleanVar(value=True)
         self.collisions_checkbox= tk.Checkbutton(self, text="Árekstrar", variable=self.collisions_var)
-        self.collisions_checkbox.grid(row=3, column=2, pady=10)
+        self.collisions_checkbox.grid(row=4, column=2)
 
         # Start and stop
         self.begin = tk.Button(self, text="Byrja", command=self.start_simulation, width=10)
-        self.begin.grid(row=5, column=2, pady=20)
+        self.begin.grid(row=3, column=2, pady=20)
         self.stop = tk.Button(self, text="Hætta", command=self.stop_simulation, width=10)
         self.stop.configure(state='disabled')
-        self.stop.grid(row=5, column=3)
+        self.stop.grid(row=3, column=3)
