@@ -11,6 +11,7 @@ class Toggles(tk.Frame):
         self.n0.configure(state='disabled')
         self.mobility.configure(state='disabled')
         self.stop.configure(state='normal')
+        self.collisions_checkbox.configure(state='disabled')
         self.controller.s = Simulation(self, self.controller.canvas)
         self.controller.s.simulate(self.pop.get(),
                                    self.n0.get(),
@@ -25,6 +26,7 @@ class Toggles(tk.Frame):
         self.n0.configure(state='normal')
         self.mobility.configure(state='normal')
         self.stop.configure(state='disabled')
+        self.collisions_checkbox.configure(state='normal')
         self.controller.s.stop()
         self.controller.canvas.delete('all')
 
